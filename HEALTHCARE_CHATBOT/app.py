@@ -2,9 +2,10 @@ from flask import Flask, render_template, request, jsonify
 import google.generativeai as ai
 
 app = Flask(__name__)
-
+import os
+API_KEY = os.getenv('GOOGLE_API_KEY')  # Use environment variable for API key
 # Replace with a secure way to store API keys, such as environment variables, for production use
-API_KEY = 'AIzaSyAmfUktmBJJ5juTDZCP1_ULPeu2dWl7LEo'
+# API_KEY = ''
 
 ai.configure(api_key=API_KEY)
 
