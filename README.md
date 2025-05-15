@@ -1,4 +1,4 @@
-🔮 Gemini Chatbot – Flask Web App
+🔮 Healthy Chatbot – Your Digital Care Taker
 
 A simple, functional chatbot built using **Flask** with **Google's Gemini API** (Generative AI) integration. 
 It features a minimalist frontend and processes chat responses using Gemini, with API keys safely loaded from environment variables.
