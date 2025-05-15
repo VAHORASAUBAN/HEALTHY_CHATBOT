@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Mental Health Chatbot</title>
+    <style>
+        body {
+            background-color: #f4f4f9;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .chat-container {
+            width: 80%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            height: 85vh;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .chat-box {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .message {
+            max-width: 75%;
+            word-wrap: break-word;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .bot-message {
+            background-color: #e3e3e3;
+            color: #333;
+            align-self: flex-start;
+        }
+
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .input-section {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #fff;
+        }
+
+        .input-section input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .input-section button {
+            border: none;
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 20px;
+            margin-left: 10px;
+            transition: background 0.2s;
+        }
+
+        .input-section button:hover {
+            background-color: #0056b3;
+        }
+
+        .input-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+        }
+
+        .predefined-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .option-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .option-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="input-title">Mental Health Chatbot</div>
+        <div class="chat-box" id="chat-box"></div>
+        <div class="predefined-options">
+            <button class="option-btn" onclick="selectOption('I feel stressed.')">I feel stressed</button>
+            <button class="option-btn" onclick="selectOption('I need help with anxiety.')">Help with anxiety</button>
+            <button class="option-btn" onclick="selectOption('How can I improve my sleep?')">Improve sleep</button>
+        </div>
+        <div class="input-section">
+            <input type="text" id="user-message" placeholder="Type your message..." autofocus>
+            <button onclick="sendMessage()">Send</button>
+            <button id="mic-button" onclick="startRecognition()">🎤</button>
+        </div>
+    </div>
+
+    <script>
+        function startRecognition() {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                document.getElementById("user-message").value = event.results[0][0].transcript;
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Speech recognition error:", event.error);
+            };
+        }
+
+        function sendMessage() {
+            let inputField = document.getElementById("user-message");
+            let chatBox = document.getElementById("chat-box");
+
+            let userMessage = inputField.value.trim();
+            if (userMessage === "") return;
+
+            let userDiv = document.createElement("div");
+            userDiv.classList.add("message", "user-message");
+            userDiv.textContent = userMessage;
+            chatBox.appendChild(userDiv);
+
+            inputField.value = "";
+            inputField.focus();
+
+            let botDiv = document.createElement("div");
+            botDiv.classList.add("message", "bot-message");
+            botDiv.textContent = "Thinking...";
+            chatBox.appendChild(botDiv);
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            fetch("http://127.0.0.1:5000/get_response", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userMessage })
+            })
+            .then(response => response.json())
+            .then(data => {
+                botDiv.textContent = data.response;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                botDiv.textContent = "Error: Unable to get a response.";
+            });
+        }
+
+        function selectOption(message) {
+            document.getElementById("user-message").value = message;
+            sendMessage();
+        }
+    </script>
+</body>
+</html>
